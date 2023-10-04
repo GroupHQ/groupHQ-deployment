@@ -2,41 +2,41 @@ apiVersion: kustomize.config.k8s.io/v1beta1
 kind: Kustomization
 
 resources:
-  - github.com/grouphq/group-sync/k8s?ref=e3e9a3f9a595f66870a5a13c45971177a1da1380
+- github.com/grouphq/group-sync/k8s?ref=e3e9a3f9a595f66870a5a13c45971177a1da1380
 
 configMapGenerator:
-  - behavior: merge
-    files:
-      - application-prod.yml
-    name: group-sync-config
+- behavior: merge
+  files:
+  - application-prod.yml
+  name: group-sync-config
 
 images:
-  - name: group-sync
-    newName: ghcr.io/grouphq/group-sync
-    newTag: e3e9a3f9a595f66870a5a13c45971177a1da1380
+- name: group-sync
+  newName: ghcr.io/grouphq/group-sync
+  newTag: 7a3a327f36d436be58a7d232bc3d85a3c55fbaaf
 
 replicas:
-  - count: 2
-    name: group-sync
+- count: 2
+  name: group-sync
 
 patches:
-  - path: patch-env.yml
-    target:
-      kind: Deployment
-      name: group-sync
-      labelSelector: "app=group-sync"
-  - path: patch-probes.yml
-    target:
-      kind: Deployment
-      name: group-sync
-      labelSelector: "app=group-sync"
-  - path: patch-resources.yml
-    target:
-      kind: Deployment
-      name: group-sync
-      labelSelector: "app=group-sync"
-  - path: patch-volumes.yml
-    target:
-      kind: Deployment
-      name: group-sync
-      labelSelector: "app=group-sync"
+- path: patch-env.yml
+  target:
+    kind: Deployment
+    labelSelector: app=group-sync
+    name: group-sync
+- path: patch-probes.yml
+  target:
+    kind: Deployment
+    labelSelector: app=group-sync
+    name: group-sync
+- path: patch-resources.yml
+  target:
+    kind: Deployment
+    labelSelector: app=group-sync
+    name: group-sync
+- path: patch-volumes.yml
+  target:
+    kind: Deployment
+    labelSelector: app=group-sync
+    name: group-sync
