@@ -1,0 +1,42 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+
+resources:
+  - github.com/grouphq/edge-service/k8s?ref=e3e9a3f9a595f66870a5a13c45971177a1da1380
+
+configMapGenerator:
+  - behavior: merge
+    files:
+      - application-prod.yml
+    name: edge-service-config
+
+images:
+  - name: edge-service
+    newName: ghcr.io/grouphq/edge-service
+    newTag: e3e9a3f9a595f66870a5a13c45971177a1da1380
+
+replicas:
+  - count: 2
+    name: edge-service
+
+patches:
+  - path: patch-env.yml
+    target:
+      kind: Deployment
+      name: edge-service
+      labelSelector: "app=edge-service"
+  - path: patch-probes.yml
+    target:
+      kind: Deployment
+      name: edge-service
+      labelSelector: "app=edge-service"
+  - path: patch-resources.yml
+    target:
+      kind: Deployment
+      name: edge-service
+      labelSelector: "app=edge-service"
+  - path: patch-volumes.yml
+    target:
+      kind: Deployment
+      name: edge-service
+      labelSelector: "app=edge-service"

@@ -1,0 +1,16 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: group-sync
+spec:
+  template:
+    spec:
+      containers:
+        - name: group-sync
+          volumeMounts:
+            - name: rabbitmq-credentials-volume
+              mountPath: /workspace/secrets/rabbitmq
+      volumes:
+        - name: rabbitmq-credentials-volume
+          secret:
+            secretName: grouphq-rabbitmq-credentials

@@ -1,0 +1,16 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: group-sync
+spec:
+  template:
+    spec:
+      containers:
+        - name: group-sync
+          resources:
+            requests:
+              cpu: "0.1"
+              memory: 756Mi
+            limits:
+              cpu: "2"
+              memory: 756Mi
