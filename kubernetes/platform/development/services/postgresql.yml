@@ -1,0 +1,66 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: postgres-config
+  labels:
+    db: grouphq-postgres
+data:
+  init.sql: |
+    CREATE DATABASE grouphq_group;
+
+---
+
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: grouphq-postgres
+  labels:
+    db: grouphq-postgres
+spec:
+  selector:
+    matchLabels:
+      db: grouphq-postgres
+  template:
+    metadata:
+      labels:
+        db: grouphq-postgres
+    spec:
+      containers:
+        - name: grouphq-postgres
+          image: postgres:14.4
+          env:
+            - name: POSTGRES_USER
+              value: user
+            - name: POSTGRES_PASSWORD
+              value: password
+          resources:
+            requests:
+              cpu: 100m
+              memory: 60Mi
+            limits:
+              cpu: 200m
+              memory: 120Mi
+          volumeMounts:
+            - mountPath: /docker-entrypoint-initdb.d
+              name: postgres-config-volume
+      volumes:
+        - name: postgres-config-volume
+          configMap:
+            name: postgres-config
+
+---
+
+apiVersion: v1
+kind: Service
+metadata:
+  name: grouphq-postgres
+  labels:
+    db: grouphq-postgres
+spec:
+  type: ClusterIP
+  selector:
+    db: grouphq-postgres
+  ports:
+    - protocol: TCP
+      port: 5432
+      targetPort: 5432

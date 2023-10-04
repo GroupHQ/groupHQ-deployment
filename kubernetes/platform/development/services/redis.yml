@@ -1,0 +1,25 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: grouphq-redis
+  labels:
+    db: grouphq-redis
+spec:
+  selector:
+    matchLabels:
+      db: grouphq-redis
+  template:
+    metadata:
+      labels:
+        db: grouphq-redis
+    spec:
+      containers:
+        - name: grouphq-redis
+          image: redis:7.0
+          resources:
+            requests:
+              cpu: 100m
+              memory: 50Mi
+            limits:
+              cpu: 200m
+              memory: 100Mi
