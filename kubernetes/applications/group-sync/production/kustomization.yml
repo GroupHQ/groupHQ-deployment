@@ -2,7 +2,7 @@ apiVersion: kustomize.config.k8s.io/v1beta1
 kind: Kustomization
 
 resources:
-- github.com/grouphq/group-sync/k8s?ref=5b8208786d8c8864eb0e2db00e13417b4156abb9
+- github.com/grouphq/group-sync/k8s?ref=39d81039da6820dc9af05ab33222dbdded0a5610
 
 configMapGenerator:
 - behavior: merge
