@@ -29,6 +29,11 @@ patches:
   target:
     kind: Ingress
     name: grouphq-ingress
+- path: patch-tracing.yml
+  target:
+    kind: Deployment
+    labelSelector: app=edge-service
+    name: edge-service
 - path: patch-probes.yml
   target:
     kind: Deployment

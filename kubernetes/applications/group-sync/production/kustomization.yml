@@ -25,6 +25,11 @@ patches:
     kind: Deployment
     labelSelector: app=group-sync
     name: group-sync
+- path: patch-tracing.yml
+  target:
+    kind: Deployment
+    labelSelector: app=group-sync
+    name: group-sync
 - path: patch-probes.yml
   target:
     kind: Deployment

@@ -25,6 +25,11 @@ patches:
     kind: Deployment
     labelSelector: app=group-service
     name: group-service
+- path: patch-tracing.yml
+  target:
+    kind: Deployment
+    labelSelector: app=group-service
+    name: group-service
 - path: patch-probes.yml
   target:
     kind: Deployment
