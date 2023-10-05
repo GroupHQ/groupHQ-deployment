@@ -2,7 +2,7 @@ apiVersion: kustomize.config.k8s.io/v1beta1
 kind: Kustomization
 
 resources:
-- github.com/grouphq/edge-service/k8s?ref=82d2437c25ac998a3a07afe23218dda1d4e7d9eb
+- github.com/grouphq/edge-service/k8s?ref=6fafe06766c524e11c746ac00328f6cfbe594fbd
 
 configMapGenerator:
 - behavior: merge
@@ -13,7 +13,7 @@ configMapGenerator:
 images:
 - name: edge-service
   newName: ghcr.io/grouphq/edge-service
-  newTag: 82d2437c25ac998a3a07afe23218dda1d4e7d9eb
+  newTag: 6fafe06766c524e11c746ac00328f6cfbe594fbd
 
 replicas:
 - count: 2
