@@ -90,7 +90,7 @@ grafana:
           editable: true
           jsonData:
             derivedFields:
-              - datasourceUid: tempo-grouphq
+              - datasourceUid: tempo
                 matcherRegex: \[.+,(.+?),
                 name: TraceID
                 url: $${__value.raw}
