@@ -1,4 +1,3 @@
-include('../../../../config-service/Tiltfile')
 include('../../../../edge-service/Tiltfile')
 include('../../../../group-sync/Tiltfile')
 include('../../../../group-service/Tiltfile')
