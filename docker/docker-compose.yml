@@ -1,0 +1,203 @@
+version: "3.8"
+services:
+  group-service:
+    depends_on:
+      - config-service
+      - grouphq-postgres
+      - grouphq-rabbitmq
+      - fluent-bit
+    image: "group-service"
+    container_name: "group-service"
+    ports:
+      - "9001:9001"
+      - "8001:8001"
+    environment:
+      - JAVA_TOOL_OPTIONS=-javaagent:/workspace/BOOT-INF/lib/opentelemetry-javaagent-1.26.0.jar
+      - OTEL_SERVICE_NAME=group-service
+      - OTEL_EXPORTER_OTLP_ENDPOINT=http://tempo:4317
+      - OTEL_METRICS_EXPORTER=none
+      - BPL_DEBUG_ENABLED=true
+      - BPL_DEBUG_PORT=8001
+      - BP_JVM_TYPE=JDK
+      - SPRING_CLOUD_CONFIG_URI=http://config-service:8888
+      - SPRING_CLOUD_CONFIG_FAIL_FAST=true
+      - SPRING_RABBITMQ_HOST=grouphq-rabbitmq
+      - SPRING_R2DBC_URL=r2dbc:postgresql://grouphq-postgres:5432/grouphq_group
+      - SPRING_FLYWAY_URL=jdbc:postgresql://grouphq-postgres:5432/grouphq_group
+      - GROUP_LOADER_ENABLED=true
+      - SERVER_ERROR_INCLUDE-STACKTRACE=never
+      - LOKI_URL=http://loki:3100/loki/api/v1/push
+      - ZIPKIN_HOST=tempo
+      - SPRING_PROFILES_ACTIVE=production
+    logging:
+      driver: fluentd
+      options:
+        fluentd-address: 127.0.0.1:24224
+
+  group-sync:
+    depends_on:
+      - group-service
+      - config-service
+      - grouphq-rabbitmq
+      - fluent-bit
+    image: "group-sync"
+    container_name: "group-sync"
+    ports:
+      - "9002:9002"
+      - "8002:8002"
+    environment:
+      - JAVA_TOOL_OPTIONS=-javaagent:/workspace/BOOT-INF/lib/opentelemetry-javaagent-1.26.0.jar
+      - OTEL_SERVICE_NAME=group-sync
+      - OTEL_EXPORTER_OTLP_ENDPOINT=http://tempo:4317
+      - OTEL_METRICS_EXPORTER=none
+      - BPL_DEBUG_ENABLED=true
+      - BPL_DEBUG_PORT=8002
+      - SPRING_CLOUD_CONFIG_URI=http://config-service:8888
+      - SPRING_CLOUD_CONFIG_FAIL_FAST=true
+      - GROUPHQ_GROUP_SERVICE_URL=http://group-service:9001
+      - SPRING_RABBITMQ_HOST=grouphq-rabbitmq
+      - SERVER_ERROR_INCLUDE-STACKTRACE=never
+      - LOKI_URL=http://loki:3100/loki/api/v1/push
+      - ZIPKIN_HOST=tempo
+      - SPRING_PROFILES_ACTIVE=production
+    logging:
+      driver: fluentd
+      options:
+        fluentd-address: 127.0.0.1:24224
+
+  edge-service:
+    depends_on:
+      - config-service
+      - grouphq-redis
+      - fluent-bit
+    image: "edge-service"
+    container_name: "edge-service"
+    ports:
+      - "9000:9000"
+      - "8000:8000"
+    environment:
+      - JAVA_TOOL_OPTIONS=-javaagent:/workspace/BOOT-INF/lib/opentelemetry-javaagent-1.26.0.jar
+      - OTEL_SERVICE_NAME=edge-service
+      - OTEL_EXPORTER_OTLP_ENDPOINT=http://tempo:4317
+      - OTEL_METRICS_EXPORTER=none
+      - BPL_DEBUG_ENABLED=true
+      - BPL_DEBUG_PORT=8000
+      - SPRING_CLOUD_CONFIG_URI=http://config-service:8888
+      - SPRING_CLOUD_CONFIG_FAIL_FAST=true
+      - GROUP_SYNC_SERVICE_URI=http://group-sync:9002
+      - SERVER_ERROR_INCLUDE-STACKTRACE=never
+      - SPRING_REDIS_HOST=grouphq-redis
+      - LOKI_URL=http://loki:3100/loki/api/v1/push
+      - ZIPKIN_HOST=tempo
+      - SPRING_PROFILES_ACTIVE=production
+    logging:
+      driver: fluentd
+      options:
+        fluentd-address: 127.0.0.1:24224
+
+  config-service:
+    image: "config-service"
+    depends_on:
+      - fluent-bit
+    container_name: "config-service"
+    ports:
+      - "8888:8888"
+      - "9888:9888"
+    environment:
+      - JAVA_TOOL_OPTIONS=-javaagent:/workspace/BOOT-INF/lib/opentelemetry-javaagent-1.26.0.jar
+      - OTEL_SERVICE_NAME=config-service
+      - OTEL_EXPORTER_OTLP_ENDPOINT=http://tempo:4317
+      - OTEL_METRICS_EXPORTER=none
+      - BPL_JVM_THREAD_COUNT=50
+      - BPL_DEBUG_ENABLED=true
+      - BPL_DEBUG_PORT=9888
+#      - SPRING_CLOUD_CONFIG_SERVER_GIT_URI=SECRET
+#      - SPRING_CLOUD_CONFIG_SERVER_GIT_USERNAME=SECRET
+#      - SPRING_CLOUD_CONFIG_SERVER_GIT_PASSWORD=SECRET
+      - SERVER_ERROR_INCLUDE-STACKTRACE=never
+      - LOKI_URL=http://loki:3100/loki/api/v1/push
+      - ZIPKIN_HOST=tempo
+      - SPRING_PROFILES_ACTIVE=production
+    logging:
+      driver: fluentd
+      options:
+        fluentd-address: 127.0.0.1:24224
+
+  grouphq-postgres:
+    image: "postgres:14.4"
+    container_name: "grouphq-postgres"
+    ports:
+      - "5432:5432"
+    environment:
+      - POSTGRES_USER=user
+      - POSTGRES_PASSWORD=password
+    volumes:
+      - ./postgresql/init.sql:/docker-entrypoint-initdb.d/init.sql
+
+  grouphq-rabbitmq:
+    image: rabbitmq:3.12-management
+    container_name: "grouphq-rabbitmq"
+    ports:
+      - "5672:5672"
+      - "15672:15672"
+    volumes:
+      - ./rabbitmq/rabbitmq.conf:/etc/rabbitmq/rabbitmq.conf
+
+  grouphq-redis:
+    image: redis:7.2
+    container_name: "grouphq-redis"
+    ports:
+      - "6379:6379"
+
+  grafana:
+    image: grafana/grafana:9.1.2
+    container_name: "grafana"
+    depends_on:
+      - loki
+      - prometheus
+      - tempo
+    ports:
+      - "3000:3000"
+    environment:
+      - GF_SECURITY_ADMIN_USER=user
+      - GF_SECURITY_ADMIN_PASSWORD=password
+    volumes:
+      - ./observability/grafana/datasource.yml:/etc/grafana/provisioning/datasources/datasource.yml:ro
+      - ./observability/grafana/dashboards:/etc/grafana/provisioning/dashboards:ro
+      - ./observability/grafana/grafana.ini:/etc/grafana/grafana.ini:ro
+
+  loki:
+    image: grafana/loki:2.6.1
+    container_name: "loki"
+    depends_on:
+      - fluent-bit
+    ports:
+      - "3100:3100"
+
+  fluent-bit:
+    image: grafana/fluent-bit-plugin-loki:2.6.1-amd64
+    container_name: fluent-bit
+    ports:
+      - "24224:24224"
+    environment:
+      - LOKI_URL=http://loki:3100/loki/api/v1/push
+    volumes:
+      - ./observability/fluent-bit/fluent-bit.conf:/fluent-bit/etc/fluent-bit.conf
+
+  prometheus:
+    image: prom/prometheus:v2.38.0
+    container_name: "prometheus"
+    ports:
+      - "9090:9090"
+    volumes:
+      - ./observability/prometheus/prometheus.yml:/etc/prometheus/prometheus.yml:ro
+
+  tempo:
+    image: grafana/tempo:1.5.0
+    container_name: tempo
+    command: -config.file /etc/tempo-config.yml
+    ports:
+      - "3110:3100"     # Tempo
+      - "4317:4317"     # OTel
+    volumes:
+      - ./observability/tempo/tempo.yml:/etc/tempo-config.yml
