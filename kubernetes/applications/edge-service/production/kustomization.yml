@@ -25,6 +25,11 @@ patches:
     kind: Deployment
     labelSelector: app=edge-service
     name: edge-service
+- path: patch-ingress.yml
+  target:
+    kind: Ingress
+    labelSelector: app=edge-service
+    name: edge-service
 - path: patch-probes.yml
   target:
     kind: Deployment
