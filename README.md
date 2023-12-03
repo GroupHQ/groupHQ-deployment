@@ -1,7 +1,7 @@
 # GroupHQ
 _GroupHQ is a demo application created as a training exercise for building and deploying reactive cloud-native applications
 through the use of Spring Boot, Project Reactor, Docker, and Kubernetes, with an emphasis on cloud-native principles,
-particularly based on the [15-factor app methodology](https://developer.ibm.com/articles/15-factor-applications/._
+particularly based on the [15-factor app methodology](https://developer.ibm.com/articles/15-factor-applications/)_
 
 ## Table of Contents
 - [Introduction](#introduction)
@@ -12,6 +12,7 @@ particularly based on the [15-factor app methodology](https://developer.ibm.com/
 - [Observability Stack](#observability-stack)
 - [Docker](#docker)
 - [Kubernetes](#kubernetes)
+- [GroupHQ Architecture Diagram](#grouphq-architecture-diagram)
 
 ## Introduction
 
@@ -178,3 +179,5 @@ they are not deployed to Kubernetes:
 - PostgreSQL: A relational database for storing application data
 - Redis: A key-value store for caching application data
 
+## GroupHQ Architecture Diagram
+![structurizr-1-GroupHQ_Demo_Containers Alpha 0 1 1 1](https://github.com/GroupHQ/groupHQ-deployment/assets/88041024/df273f5d-a065-4555-8427-80b226185e6a)
