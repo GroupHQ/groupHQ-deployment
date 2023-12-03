@@ -23,3 +23,20 @@ spec:
             limits:
               cpu: 200m
               memory: 100Mi
+
+---
+
+apiVersion: v1
+kind: Service
+metadata:
+  name: grouphq-redis
+  labels:
+    db: grouphq-redis
+spec:
+  type: ClusterIP
+  selector:
+    db: grouphq-redis
+  ports:
+    - protocol: TCP
+      port: 6379
+      targetPort: 6379

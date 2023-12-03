@@ -1,5 +1,6 @@
 include('../../../../edge-service/Tiltfile')
 include('../../../../group-sync/Tiltfile')
 include('../../../../group-service/Tiltfile')
+include('../../../../grouphq-ui/Tiltfile')
 
 update_settings(max_parallel_updates=1)

@@ -149,6 +149,14 @@ services:
     ports:
       - "6379:6379"
 
+  grouphq-ui:
+    image: "grouphq-ui"
+    container_name: "grouphq-ui"
+    ports:
+      - "4200:4200"
+    environment:
+      - PORT=4200
+
   grafana:
     image: grafana/grafana:9.1.2
     container_name: "grafana"
