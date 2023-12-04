@@ -1,12 +1,12 @@
 {
   "api": {
     "port": 443,
-    "host": "grouphq.org",
+    "host": "143.244.203.230",
     "endpoint": "",
     "protocol": "https"
   },
   "rsocket": {
-    "host": "grouphq.org",
+    "host": "143.244.203.230",
     "port": 443,
     "endpoint": "rsocket",
     "keepAlive": 5,
