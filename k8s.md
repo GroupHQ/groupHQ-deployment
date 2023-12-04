@@ -220,7 +220,7 @@ kubectl -n argocd get secret argocd-initial-admin-secret \
 `kubectl -n argocd get service argocd-server`
 
 
-- **Login to ArgoCD:**
+- **Login to ArgoCD (username is admin. for password, see above):**
 `argocd login <argocd-external-ip>`
 
 
@@ -243,6 +243,13 @@ argocd app create <deployment-name> \
 --auto-prune 
 ```
 
+argocd app create grouphq-ui \
+--repo https://github.com/GroupHQ/groupHQ-deployment \
+--path kubernetes/applications/grouphq-ui/production \
+--dest-server https://kubernetes.default.svc \
+--dest-namespace default \
+--sync-policy auto \
+--auto-prune
 
 - **Get details of an ArgoCD app:**
 `argocd app get <deployment-name>`
