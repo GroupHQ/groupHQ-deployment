@@ -11,7 +11,13 @@ spec:
             httpGet:
               path: /actuator/health/liveness
               port: 9001
-            initialDelaySeconds: 30
+            failureThreshold: 1
+            periodSeconds: 5
+          startupProbe:
+            httpGet:
+              path: /actuator/health/liveness
+              port: 9001
+            failureThreshold: 25
             periodSeconds: 5
           readinessProbe:
             httpGet:
