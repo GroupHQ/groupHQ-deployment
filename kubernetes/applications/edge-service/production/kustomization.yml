@@ -16,7 +16,7 @@ images:
   newTag: 79087b705f2a8d98f707541d197c16a36fd1ccd5
 
 replicas:
-- count: 2
+- count: 1
   name: edge-service
 
 patches:

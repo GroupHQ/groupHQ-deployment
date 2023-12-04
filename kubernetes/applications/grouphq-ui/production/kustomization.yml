@@ -16,7 +16,7 @@ images:
   newTag: 5c9e0eb65074f9edaadc870c3366b074538a7fe0
 
 replicas:
-- count: 2
+- count: 1
   name: grouphq-ui
 
 patches:
