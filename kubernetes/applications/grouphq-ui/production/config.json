@@ -7,7 +7,7 @@
   },
   "rsocket": {
     "host": "143.244.203.230",
-    "port": 443,
+    "port": 80,
     "endpoint": "rsocket",
     "keepAlive": 5,
     "lifetime": 30,
