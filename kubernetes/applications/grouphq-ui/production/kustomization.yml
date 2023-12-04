@@ -2,31 +2,31 @@ apiVersion: kustomize.config.k8s.io/v1beta1
 kind: Kustomization
 
 resources:
-  - github.com/grouphq/grouphq-ui/k8s?ref=39d81039da6820dc9af05ab33222dbdded0a5610
+- github.com/grouphq/grouphq-ui/k8s?ref=5c9e0eb65074f9edaadc870c3366b074538a7fe0
 
 configMapGenerator:
-  - behavior: replace
-    files:
-      - config.json
-    name: grouphq-ui-config
+- behavior: replace
+  files:
+  - config.json
+  name: grouphq-ui-config
 
 images:
-  - name: grouphq-ui
-    newName: ghcr.io/grouphq/grouphq-ui
-    newTag: 39d81039da6820dc9af05ab33222dbdded0a5610
+- name: grouphq-ui
+  newName: ghcr.io/grouphq/grouphq-ui
+  newTag: 5c9e0eb65074f9edaadc870c3366b074538a7fe0
 
 replicas:
-  - count: 2
-    name: grouphq-ui
+- count: 2
+  name: grouphq-ui
 
 patches:
-  - path: patch-env.yml
-    target:
-      kind: Deployment
-      labelSelector: app=grouphq-ui
-      name: grouphq-ui
-  - path: patch-resources.yml
-    target:
-      kind: Deployment
-      labelSelector: app=grouphq-ui
-      name: grouphq-ui
+- path: patch-env.yml
+  target:
+    kind: Deployment
+    labelSelector: app=grouphq-ui
+    name: grouphq-ui
+- path: patch-resources.yml
+  target:
+    kind: Deployment
+    labelSelector: app=grouphq-ui
+    name: grouphq-ui
