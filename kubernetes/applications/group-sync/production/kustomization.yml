@@ -2,7 +2,7 @@ apiVersion: kustomize.config.k8s.io/v1beta1
 kind: Kustomization
 
 resources:
-- github.com/grouphq/group-sync/k8s?ref=7762c07950d15d9dc29f28971ffea7c18a480f68
+- github.com/grouphq/group-sync/k8s?ref=a164771885faa2a85ef795cc790fabee779fc059
 
 configMapGenerator:
 - behavior: merge
@@ -13,7 +13,7 @@ configMapGenerator:
 images:
 - name: group-sync
   newName: ghcr.io/grouphq/group-sync
-  newTag: 7762c07950d15d9dc29f28971ffea7c18a480f68
+  newTag: a164771885faa2a85ef795cc790fabee779fc059
 
 replicas:
 - count: 1
