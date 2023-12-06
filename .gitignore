@@ -28,6 +28,12 @@ bin/
 ### Mac OS ###
 .DS_Store
 
-docker/secrets
 .idea
 groupHQ-deployment.iml
+
+### Ignore All Kubernetes Secret Files ###
+**/secrets
+
+### Ignore All Certificate Files ###
+**.pem
+
