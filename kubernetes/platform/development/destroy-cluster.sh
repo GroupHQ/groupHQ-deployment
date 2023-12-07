@@ -1,9 +1,9 @@
 #!/bin/sh
 
-echo "\n🏴️ Destroying Kubernetes cluster...\n"
+echo "🏴️ Destroying Kubernetes cluster..."
 
 minikube stop --profile grouphq
 
 minikube delete --profile grouphq
 
-echo "\n🏴️ Cluster destroyed\n"
+echo "🏴️ Cluster destroyed"

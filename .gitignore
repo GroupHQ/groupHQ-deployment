@@ -37,3 +37,6 @@ groupHQ-deployment.iml
 ### Ignore All Certificate Files ###
 **.pem
 
+### Ignore Script Related Files ###
+**.out
+**.pid
