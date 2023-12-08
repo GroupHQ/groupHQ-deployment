@@ -5,8 +5,8 @@ services:
       - config-service
       - grouphq-postgres
       - grouphq-rabbitmq
-      - fluent-bit
-    image: "group-service"
+      - grafana
+    image: "ghcr.io/grouphq/group-service"
     container_name: "group-service"
     ports:
       - "9001:9001"
@@ -19,8 +19,8 @@ services:
       - BPL_DEBUG_ENABLED=true
       - BPL_DEBUG_PORT=8001
       - BP_JVM_TYPE=JDK
-      - SPRING_CLOUD_CONFIG_URI=http://config-service:8888
-      - SPRING_CLOUD_CONFIG_FAIL_FAST=true
+#      - SPRING_CLOUD_CONFIG_URI=http://config-service:8888
+#      - SPRING_CLOUD_CONFIG_FAIL_FAST=true
       - SPRING_RABBITMQ_HOST=grouphq-rabbitmq
       - SPRING_R2DBC_URL=r2dbc:postgresql://grouphq-postgres:5432/grouphq_group
       - SPRING_FLYWAY_URL=jdbc:postgresql://grouphq-postgres:5432/grouphq_group
@@ -39,8 +39,8 @@ services:
       - group-service
       - config-service
       - grouphq-rabbitmq
-      - fluent-bit
-    image: "group-sync"
+      - grafana
+    image: "ghcr.io/grouphq/group-sync"
     container_name: "group-sync"
     ports:
       - "9002:9002"
@@ -52,8 +52,8 @@ services:
       - OTEL_METRICS_EXPORTER=none
       - BPL_DEBUG_ENABLED=true
       - BPL_DEBUG_PORT=8002
-      - SPRING_CLOUD_CONFIG_URI=http://config-service:8888
-      - SPRING_CLOUD_CONFIG_FAIL_FAST=true
+#      - SPRING_CLOUD_CONFIG_URI=http://config-service:8888
+#      - SPRING_CLOUD_CONFIG_FAIL_FAST=true
       - GROUPHQ_GROUP_SERVICE_URL=http://group-service:9001
       - SPRING_RABBITMQ_HOST=grouphq-rabbitmq
       - SERVER_ERROR_INCLUDE-STACKTRACE=never
@@ -69,8 +69,8 @@ services:
     depends_on:
       - config-service
       - grouphq-redis
-      - fluent-bit
-    image: "edge-service"
+      - grafana
+    image: "ghcr.io/grouphq/edge-service"
     container_name: "edge-service"
     ports:
       - "9000:9000"
@@ -82,8 +82,8 @@ services:
       - OTEL_METRICS_EXPORTER=none
       - BPL_DEBUG_ENABLED=true
       - BPL_DEBUG_PORT=8000
-      - SPRING_CLOUD_CONFIG_URI=http://config-service:8888
-      - SPRING_CLOUD_CONFIG_FAIL_FAST=true
+#      - SPRING_CLOUD_CONFIG_URI=http://config-service:8888
+#      - SPRING_CLOUD_CONFIG_FAIL_FAST=true
       - GROUP_SYNC_SERVICE_URI=http://group-sync:9002
       - SERVER_ERROR_INCLUDE-STACKTRACE=never
       - SPRING_REDIS_HOST=grouphq-redis
@@ -150,8 +150,12 @@ services:
       - "6379:6379"
 
   grouphq-ui:
-    image: "grouphq-ui"
+    image: "ghcr.io/grouphq/grouphq-ui"
     container_name: "grouphq-ui"
+    depends_on:
+      - edge-service
+      - group-sync
+      - group-service
     ports:
       - "4200:4200"
     environment:

@@ -13,6 +13,7 @@ metadata:
     nginx.org/websocket-services: "edge-service"
     nginx.org/proxy-connect-timeout: "3600"
     nginx.org/proxy-read-timeout: "3600"
+    cert-manager.io/cluster-issuer: letsencrypt-issuer
 spec:
   rules:
     - host: grouphq.org

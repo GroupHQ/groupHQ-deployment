@@ -1,0 +1,8 @@
+apiVersion: v1
+kind: Secret
+type: kubernetes.io/dockerconfigjson
+metadata:
+  namespace: default
+  name: ghcr-secret
+data:
+  .dockerconfigjson: YOUR_BASE64_ENCODED_CONFIGURATION

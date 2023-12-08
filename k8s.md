@@ -96,9 +96,11 @@ The following is a list of commands to work with Kubernetes
   `kubectl get cm -l app=group-service`
 
 
-- **Create a secret from literals:**  
+- **Create a generic secret from literals:**  
   `kubectl create secret generic <secret-name> --from-literal=<example-property-key>=<example-property-value>`
 
+- **Create a tls secret from file:**
+  `kubectl create secret tls <secret-name> --key="<path-to-file-with-private-key>" --cert="<path to file with certificate-key>"`
 
 - **Retrieve a specific secret:**  
   `kubectl get secret <secret-name>`
@@ -234,22 +236,14 @@ argocd repo add <repo-link> \
 
 - **Create an ArgoCD app:**
 ```shell
-argocd app create <deployment-name> \
---repo <repo-link> \
---path <directory-path-to-monitor> \
+argocd app create <application-deployment-name, e.g. group-service> \
+--repo <deployment-repo-link> \
+--path <manifest-directory-path-to-monitor> \
 --dest-server https://kubernetes.default.svc \
 --dest-namespace default \
 --sync-policy auto \
 --auto-prune 
 ```
-
-argocd app create grouphq-ui \
---repo https://github.com/GroupHQ/groupHQ-deployment \
---path kubernetes/applications/grouphq-ui/production \
---dest-server https://kubernetes.default.svc \
---dest-namespace default \
---sync-policy auto \
---auto-prune
 
 - **Get details of an ArgoCD app:**
 `argocd app get <deployment-name>`

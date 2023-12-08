@@ -69,6 +69,7 @@ cd ./certificates || exit
 # Switch to Kubernetes Secrets Development Directory
 cd ../../../../secrets/kubernetes/development || exit
 
+echo "🔑Creating GitHub Container Registry Secret..."
 kubectl apply -f ghcr-container-registry-read.yml
 
 # Run Tilt up

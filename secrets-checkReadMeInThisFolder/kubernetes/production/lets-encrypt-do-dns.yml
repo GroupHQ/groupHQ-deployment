@@ -1,0 +1,7 @@
+apiVersion: v1
+kind: Secret
+metadata:
+  namespace: cert-manager
+  name: lets-encrypt-do-dns
+data:
+  access-token: YOUR_TOKEN_HERE

@@ -18,6 +18,13 @@ kill_process() {
     fi
 }
 
+echo "Unsetting context..."
+kubectl config unset current-context
+sleep 1
+
+echo "Switching to local GroupHQ context..."
+kubectl config use-context grouphq
+
 echo "Ensuring minikube tunnel and tilt processes are stopped..."
 
 # Step 1: Kill the minikube tunnel process
