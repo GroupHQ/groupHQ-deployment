@@ -70,9 +70,9 @@ cd ./observability || exit
 cd ../certificates || exit
 ./create-tls-secret-localhost.sh
 
-# Run Tilt up
+# Run tlt up
 cd ../../../applications/development || exit
-nohup tilt up &
+nohup tlt up &
 echo $! > "$original_dir/processes/tilt.pid"
 
 # Run minikube tunnel

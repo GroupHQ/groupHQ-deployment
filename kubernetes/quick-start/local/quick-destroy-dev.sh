@@ -36,10 +36,10 @@ kill_process "./processes/tilt.pid"
 # Step 3: Kill the Grafana Console port-forwarding process
 kill_process "./processes/grafana-console-port-forward.pid"
 
-# Step 4: Run `tilt down`
-echo "Running 'tilt down'..."
+# Step 4: Run `tlt down`
+echo "Running 'tlt down'..."
 cd "../../applications/development" || exit
-tilt down
+tlt down
 
 # Step 5: Run the destroy cluster script
 echo "Running destroy cluster script..."

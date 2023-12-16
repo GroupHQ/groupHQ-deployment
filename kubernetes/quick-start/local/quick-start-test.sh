@@ -72,7 +72,7 @@ cd ../../../../secrets/kubernetes/development || exit
 echo "🔑Creating GitHub Container Registry Secret..."
 kubectl apply -f ghcr-container-registry-read.yml
 
-# Run Tilt up
+# Run tlt up
 cd ../../../kubernetes/applications/development || exit
 
 # Initialize variables to false
@@ -109,7 +109,7 @@ export TILT_BUILD_GROUPHQ_UI_LOCALLY
 export TILT_BUILD_GROUP_SYNC_LOCALLY
 export TILT_BUILD_GROUP_SERVICE_LOCALLY
 
-nohup tilt up &
+nohup tlt up &
 echo $! > "$original_dir/processes/tilt.pid"
 
 # Run minikube tunnel
