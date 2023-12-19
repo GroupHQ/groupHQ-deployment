@@ -2,13 +2,13 @@
   "api": {
     "port": 443,
     "host": "grouphq.org",
-    "endpoint": "",
+    "endpoint": "/api",
     "protocol": "https"
   },
   "rsocket": {
     "host": "grouphq.org",
     "port": 443,
-    "endpoint": "rsocket",
+    "endpoint": "api/rsocket",
     "protocol": "wss",
     "keepAlive": 5,
     "lifetime": 30,
