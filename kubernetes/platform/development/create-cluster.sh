@@ -2,7 +2,7 @@
 
 echo "📦 Initializing Kubernetes cluster..."
 
-minikube start --cpus 6 --memory 4g --driver docker --profile grouphq
+minikube start --cpus 3 --memory 4g --driver docker --profile grouphq
 
 echo "🔌 Enabling NGINX Ingress Controller..."
 

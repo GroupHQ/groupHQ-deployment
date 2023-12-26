@@ -2,7 +2,6 @@ version: "3.8"
 services:
   group-service:
     depends_on:
-      - config-service
       - grouphq-postgres
       - grouphq-rabbitmq
       - grafana
@@ -19,8 +18,6 @@ services:
       - BPL_DEBUG_ENABLED=true
       - BPL_DEBUG_PORT=8001
       - BP_JVM_TYPE=JDK
-#      - SPRING_CLOUD_CONFIG_URI=http://config-service:8888
-#      - SPRING_CLOUD_CONFIG_FAIL_FAST=true
       - SPRING_RABBITMQ_HOST=grouphq-rabbitmq
       - SPRING_R2DBC_URL=r2dbc:postgresql://grouphq-postgres:5432/grouphq_group
       - SPRING_FLYWAY_URL=jdbc:postgresql://grouphq-postgres:5432/grouphq_group
@@ -36,8 +33,6 @@ services:
 
   group-sync:
     depends_on:
-      - group-service
-      - config-service
       - grouphq-rabbitmq
       - grafana
     image: "ghcr.io/grouphq/group-sync"
@@ -52,8 +47,6 @@ services:
       - OTEL_METRICS_EXPORTER=none
       - BPL_DEBUG_ENABLED=true
       - BPL_DEBUG_PORT=8002
-#      - SPRING_CLOUD_CONFIG_URI=http://config-service:8888
-#      - SPRING_CLOUD_CONFIG_FAIL_FAST=true
       - GROUPHQ_GROUP_SERVICE_URL=http://group-service:9001
       - SPRING_RABBITMQ_HOST=grouphq-rabbitmq
       - SERVER_ERROR_INCLUDE-STACKTRACE=never
@@ -67,7 +60,6 @@ services:
 
   edge-service:
     depends_on:
-      - config-service
       - grouphq-redis
       - grafana
     image: "ghcr.io/grouphq/edge-service"
@@ -82,39 +74,10 @@ services:
       - OTEL_METRICS_EXPORTER=none
       - BPL_DEBUG_ENABLED=true
       - BPL_DEBUG_PORT=8000
-#      - SPRING_CLOUD_CONFIG_URI=http://config-service:8888
-#      - SPRING_CLOUD_CONFIG_FAIL_FAST=true
-      - GROUP_SYNC_SERVICE_URI=http://group-sync:9002
+      - GROUP_SYNC_SERVICE_HTTP_URI=http://group-sync:9002
+      - GROUP_SYNC_SERVICE_WS_URI=ws://group-sync:9002
       - SERVER_ERROR_INCLUDE-STACKTRACE=never
       - SPRING_REDIS_HOST=grouphq-redis
-      - LOKI_URL=http://loki:3100/loki/api/v1/push
-      - ZIPKIN_HOST=tempo
-      - SPRING_PROFILES_ACTIVE=production
-    logging:
-      driver: fluentd
-      options:
-        fluentd-address: 127.0.0.1:24224
-
-  config-service:
-    image: "config-service"
-    depends_on:
-      - fluent-bit
-    container_name: "config-service"
-    ports:
-      - "8888:8888"
-      - "9888:9888"
-    environment:
-      - JAVA_TOOL_OPTIONS=-javaagent:/workspace/BOOT-INF/lib/opentelemetry-javaagent-1.26.0.jar
-      - OTEL_SERVICE_NAME=config-service
-      - OTEL_EXPORTER_OTLP_ENDPOINT=http://tempo:4317
-      - OTEL_METRICS_EXPORTER=none
-      - BPL_JVM_THREAD_COUNT=50
-      - BPL_DEBUG_ENABLED=true
-      - BPL_DEBUG_PORT=9888
-#      - SPRING_CLOUD_CONFIG_SERVER_GIT_URI=SECRET
-#      - SPRING_CLOUD_CONFIG_SERVER_GIT_USERNAME=SECRET
-#      - SPRING_CLOUD_CONFIG_SERVER_GIT_PASSWORD=SECRET
-      - SERVER_ERROR_INCLUDE-STACKTRACE=never
       - LOKI_URL=http://loki:3100/loki/api/v1/push
       - ZIPKIN_HOST=tempo
       - SPRING_PROFILES_ACTIVE=production
