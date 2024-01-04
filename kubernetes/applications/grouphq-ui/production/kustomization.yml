@@ -2,7 +2,7 @@ apiVersion: kustomize.config.k8s.io/v1beta1
 kind: Kustomization
 
 resources:
-- github.com/grouphq/grouphq-ui/k8s?ref=b639d6bf6c7f7815d1e9a716e67369bf642f5780
+- github.com/grouphq/grouphq-ui/k8s?ref=7a063b6f5c5071d2ddba63705328d3ef0a170b85
 
 configMapGenerator:
 - behavior: replace
@@ -13,7 +13,7 @@ configMapGenerator:
 images:
 - name: grouphq-ui
   newName: ghcr.io/grouphq/grouphq-ui
-  newTag: b639d6bf6c7f7815d1e9a716e67369bf642f5780
+  newTag: 7a063b6f5c5071d2ddba63705328d3ef0a170b85
 
 replicas:
 - count: 1
