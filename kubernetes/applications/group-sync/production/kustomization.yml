@@ -11,8 +11,7 @@ configMapGenerator:
   name: group-sync-config
 
 images:
-- name: group-sync
-  newName: ghcr.io/grouphq/group-sync
+- name: ghcr.io/grouphq/group-sync
   newTag: 1fc664b238954e24b652d0c79bff54d3337b6271
 
 replicas:

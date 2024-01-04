@@ -11,8 +11,7 @@ configMapGenerator:
   name: group-service-config
 
 images:
-- name: group-service
-  newName: ghcr.io/grouphq/group-service
+- name: ghcr.io/grouphq/group-service
   newTag: 3f1bcd4e431ff705a92e77e637051f70a81fc890
 
 replicas:

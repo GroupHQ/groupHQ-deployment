@@ -11,8 +11,7 @@ configMapGenerator:
   name: grouphq-ui-config
 
 images:
-- name: grouphq-ui
-  newName: ghcr.io/grouphq/grouphq-ui
+- name: ghcr.io/grouphq/grouphq-ui
   newTag: abe5772cd96442d0ce845228edb3322267483b7f
 
 replicas:
