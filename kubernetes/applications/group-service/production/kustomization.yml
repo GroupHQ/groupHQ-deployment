@@ -12,9 +12,6 @@ configMapGenerator:
 
 images:
 - name: ghcr.io/grouphq/group-service
-  newTag: 3f1bcd4e431ff705a92e77e637051f70a81fc890
-- name: group-service
-  newName: ghcr.io/grouphq/group-service
   newTag: 6493db233e0f08125f892b781c0311d57017f8fe
 
 replicas:
