@@ -1,0 +1,7 @@
+apiVersion: v1
+kind: Secret
+metadata:
+  name: group-service-open-ai-api-key
+type: Opaque
+data:
+  openai.api_key: YOUR_API_KEY
