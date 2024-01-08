@@ -1,6 +1,16 @@
 spring:
   config:
     import: configtree:/workspace/secrets/*/
+openai:
+  enabled: true
+  api_key: ${OPEN_AI_API_KEY}
+  max-tokens: 500
+  model-id: gpt-3.5-turbo
+  retry-config:
+    initial-delay: 1000
+    max-attempts: 3
+    max-delay: 5000
+    jitter-factor: 1.5
 group:
   loader:
     enabled: true
@@ -12,7 +22,7 @@ group:
         fixed-group-addition-count: 1
       expire-groups:
         initial-delay: 0
-        fixed-delay: 300
+        fixed-delay: 179
         group-lifetime: 1800
       load-members:
         initial-delay: 5

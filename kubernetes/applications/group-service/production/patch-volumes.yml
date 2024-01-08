@@ -12,6 +12,8 @@ spec:
               mountPath: /workspace/secrets/postgres
             - name: rabbitmq-credentials-volume
               mountPath: /workspace/secrets/rabbitmq
+            - name: group-service-open-ai-api-key-volume
+              mountPath: /workspace/secrets/open-ai
       volumes:
         - name: postgres-credentials-volume
           secret:
@@ -19,3 +21,6 @@ spec:
         - name: rabbitmq-credentials-volume
           secret:
             secretName: grouphq-rabbitmq-credentials
+        - name: group-service-open-ai-api-key-volume
+          secret:
+            secretName: group-service-open-ai-api-key
