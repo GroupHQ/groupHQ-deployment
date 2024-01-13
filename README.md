@@ -1,9 +1,11 @@
 _This README is a work in progress. Some steps may be incomplete or missing_
 
 # GroupHQ
-_GroupHQ is a demo application created as a training exercise for building and deploying reactive cloud-native applications
-through the use of Spring Boot, Project Reactor, Docker, and Kubernetes, with an emphasis on cloud-native principles,
-particularly based on the [15-factor app methodology](https://developer.ibm.com/articles/15-factor-applications/)_
+_[GroupHQ](https://grouphq.org/) is a demo application created as a training exercise for building and deploying
+[reactive](https://en.wikipedia.org/wiki/Reactive_Streams) [cloud-native applications](https://aws.amazon.com/what-is/cloud-native/)
+through the use of [Spring Boot](https://www.ibm.com/topics/java-spring-boot), [Project Reactor](https://projectreactor.io/),
+[Docker](https://www.docker.com/), and [Kubernetes](https://kubernetes.io/), with an
+emphasis on cloud-native principles, particularly based on the [15-factor app methodology](https://developer.ibm.com/articles/15-factor-applications/)_
 
 ## Contents
 - [Introduction](#introduction)
@@ -33,9 +35,9 @@ particularly based on the [15-factor app methodology](https://developer.ibm.com/
 Version: DEMO
 
 The GroupHQ Demo allows users to view, sync, join and leave auto-generated groups. While seemingly simple in nature,
-the demo is backed by robust and extensible services for improving and adding onto the feature set. The system follows
-a microservice architecture to decouple services and allows for independent development and deployment. The following
-sections will go into detail about the architecture and the services that make up the GroupHQ Demo.
+the demo is backed by robust and extensible services for improving and adding onto the feature set. The system is
+designed as a set of microservices to enable decoupling of services, independent development and deployment, and
+improved scalability compared to traditional monolithic applications.
 
 The following services are currently available:
 - Edge Service
