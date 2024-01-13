@@ -16,7 +16,7 @@ images:
   newTag: 1970f608b96c1215fc811f947b00537484f6c473
 
 replicas:
-- count: 1
+- count: 2
   name: group-service
 
 patches:
