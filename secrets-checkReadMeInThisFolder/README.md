@@ -7,7 +7,7 @@ This secret allows the grouphq minikube cluster to pull images from the GitHub c
 
 To set up the secret, you'll need to create a GitHub personal access token with the `read:packages` scope.
 
-Once you have the token, [follow the instructions here to create the secret](https://kubernetes.io/docs/tasks/configure-pod-container/pull-image-private-registry/#registry-secret-existing-credentials).
+Once you have the token, [follow the instructions here to create the secret](https://kubernetes.io/docs/tasks/configure-pod-container/pull-image-private-registry/#create-a-secret-by-providing-credentials-on-the-command-line).
 Hint: The guide linked above assumes you already have kubectl set to a cluster context. You can start up
 the local cluster using the script to follow the guide. The script step applying the secret will fail, but that
 shouldn't stop you from following the guide. Then you can either manually apply the secret, or run the script again.
