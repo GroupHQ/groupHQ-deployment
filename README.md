@@ -224,9 +224,9 @@ doctl databases connection <postgres_id> --format Host,Port,User,Password
 
 Then create a secret for the database credentials (used by the group-service manifests):
 ```shell
-kubectl create secret generic polar-postgres-catalog-credentials \
---from-literal=spring.datasource.url="spring.flyway.url=jdbc:postgresql://<postgres_host>:<postgres_port>/polardb_order" \
---from-literal="spring.r2dbc.url=r2dbc:postgresql://<postgres_host>:<postgres_port>/polardb_order?ssl=true&sslMode=require" 
+kubectl create secret generic grouphq-postgres-group-credentials \
+--from-literal="spring.flyway.url=jdbc:postgresql://<postgres_host>:<postgres_port>/<database_name>" \
+--from-literal="spring.r2dbc.url=r2dbc:postgresql://<postgres_host>:<postgres_port>/<database_name>?ssl=true&sslMode=require" \
 --from-literal=spring.r2dbc.username=<postgres_username> \
 --from-literal=spring.r2dbc.password=<postgres_password>
 ```
