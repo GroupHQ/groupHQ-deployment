@@ -267,7 +267,7 @@ kubectl create secret generic grouphq-redis-credentials \
 
 #### RabbitMQ
 Unlike the other backing services which use servers managed by Digital Ocean, RabbitMQ is not offered as a managed
-service by Digital Ocean. Instead, the RabbitMQ cluster-operator is used to deploy RabbitMQ to the cluster.
+service. Instead, the RabbitMQ cluster-operator is used to deploy RabbitMQ to the cluster.
 
 In the `kubernets/platform/production/rabbitmq` folder, run the following command to deploy the RabbitMQ cluster-operator:
 ```shell
