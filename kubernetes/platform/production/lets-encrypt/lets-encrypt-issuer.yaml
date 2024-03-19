@@ -11,7 +11,8 @@ spec:
     solvers:
       - selector: {}
         dns01:
-          digitalocean:
-            tokenSecretRef:
-              name: lets-encrypt-do-dns
-              key: access-token
+          cloudflare:
+            email: therealmohamedmohamed@gmail.com
+            apiTokenSecretRef:
+              name: cloudflare-api-token-secret
+              key: api-token
