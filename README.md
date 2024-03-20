@@ -360,9 +360,9 @@ the production manifests, committing the changes to the main branch. These chang
 In production, Let's Encrypt is used to automate the process of periodically providing free TLS certificates for the
 `grouphq.org` domain.
 
-First, the Let's Encrypt `ClusterIssuer` manifest needs a Digital Ocean API access token with read and write access
-to interact with the Digital Ocean DNS API. Put that token in the `secrets/kubernets/production/lets-encrypt-do-dns.yml`
-file. If you've never worked with the `secrets` folder, then it's probably named `secrets-checkReadMeInThisFolder`.
+First, the Let's Encrypt `ClusterIssuer` manifest needs a CloudFlare API token CloudFlare DNS API (which GroupHQ uses for its DNS servers). 
+Put that token in the `secrets/kubernets/production/cloudflare-api-token-secret.yml` file. 
+If you've never worked with the `secrets` folder, then it's probably named `secrets-checkReadMeInThisFolder`.
 Follow the instructions in the README.md file in that folder before continuing.
 
 After applying the secret to the cluster, go to the `kubernetes/platform/production/lets-encrypt` folder.
