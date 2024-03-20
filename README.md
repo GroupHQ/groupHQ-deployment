@@ -1,5 +1,3 @@
-_This README is a work in progress. Some steps may be incomplete or missing_
-
 # GroupHQ
 _[GroupHQ](https://grouphq.org/) is a demo application created as a training exercise for building and deploying
 [reactive](https://en.wikipedia.org/wiki/Reactive_Streams) [cloud-native applications](https://aws.amazon.com/what-is/cloud-native/)
