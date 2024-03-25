@@ -1,194 +1,141 @@
 # GroupHQ
-_GroupHQ is a demo application created as a training exercise for building and deploying reactive cloud-native applications
-through the use of Spring Boot, Project Reactor, Docker, and Kubernetes, with an emphasis on cloud-native principles,
-particularly based on the [15-factor app methodology](https://developer.ibm.com/articles/15-factor-applications/)_
+_[GroupHQ](https://grouphq.org/) is a demo application created as a training exercise for building and deploying
+[reactive](https://en.wikipedia.org/wiki/Reactive_Streams) [cloud-native applications](https://aws.amazon.com/what-is/cloud-native/)
+through the use of [Spring Boot](https://www.ibm.com/topics/java-spring-boot), [Project Reactor](https://projectreactor.io/),
+[Docker](https://www.docker.com/), and [Kubernetes](https://kubernetes.io/), with an
+emphasis on cloud-native principles, particularly based on the [15-factor app methodology](https://developer.ibm.com/articles/15-factor-applications/)_
 
-## Table of Contents
+## Contents
 - [Introduction](#introduction)
-- [Edge Service](#edge-service)
-- [Group Sync](#group-sync)
-- [Group Service](#group-service)
-- [Config Service and Kubernetes Patches](#config-service-and-kubernetes-patches)
+- [Key Services](#key-services)
 - [Observability Stack](#observability-stack)
 - [Docker](#docker)
 - [Kubernetes](#kubernetes)
-- [GroupHQ Architecture Diagram](#grouphq-architecture-diagram)
+  - [Overlays (i.e. configuration patches)](#overlays-ie-configuration-patches)
+- [Development Environment Setup](#development-environment-setup)
+  - [Local Environment Using Docker](#local-environment-using-docker)
+  - [Local Environment Using Kubernetes](#local-environment-using-kubernetes)
+- [Production Environment Setup](#production-environment-setup)
+  - [Creating the Cluster](#creating-the-cluster)
+  - [Creating the Backing Services](#creating-the-backing-services)
+    - [PostgreSQL](#postgresql)
+    - [Redis](#redis)
+    - [RabbitMQ](#rabbitmq)
+  - [Deploying the Grafana Observability Stack](#deploying-the-grafana-observability-stack)
+  - [Deploying and Syncing the Applications Using Argo CD](#deploying-and-syncing-the-applications-using-argo-cd)
+  - [Setting Up TLS/SSL Certificate for HTTPS/WSS Connections](#setting-up-tlsssl-certificate-for-httpswss-connections)
+  - [Deleting the Cluster and Backing Services](#deleting-the-cluster-and-backing-services)
+    - [Deleting the Cluster](#deleting-the-cluster)
+    - [Deleting the Backing Services](#deleting-the-backing-services)
 
 ## Introduction
 
 Version: DEMO
 
 The GroupHQ Demo allows users to view, sync, join and leave auto-generated groups. While seemingly simple in nature,
-the demo is backed by robust and extensible services for improving and adding onto the feature set. The system follows
-a microservice architecture to decouple services and allows for independent development and deployment. The following
-sections will go into detail about the architecture and the services that make up the GroupHQ Demo.
+the demo is backed by robust and extensible services for improving and adding onto the feature set. The system is
+designed as a set of microservices to enable decoupling of services, independent development and deployment, and
+improved scalability compared to traditional monolithic applications.
 
 The following services are currently available:
 - Edge Service
 - Group Sync
 - Group Service
+- GroupHQ UI (frontend application)
 
-Each service has been created with cloud-native principles in mind. They are independently deployable, scalable, and
-resilient in case of downstream errors.
+Each service has been created with [cloud-native](https://developer.ibm.com/articles/15-factor-applications/) principles 
+in mind. They are independently deployable, scalable, and resilient in case of downstream errors.
 
-## Edge Service
+## Architecture Diagrams
+You can find the architecture diagrams for the GroupHQ Demo in the `architecture/demo` folder in this repository.
+The following diagrams are available:
+- GroupHQ Demo Containers (with Observability Stack)
+- GroupHQ Demo Containers (without Observability Stack)
+- GroupHQ Demo Gateway-Related Containers
+- GroupHQ Demo Group-Service-Related Containers
+- GroupHQ Demo Observability Related Containers
 
-The Edge Service is the entry point for all requests to the GroupHQ Demo. It is responsible for routing requests to
-the appropriate service, as well as handling authentication and authorization*. The Edge Service is also responsible for
-serving the frontend application (to be created).
+## Key Services
+To view information on key services, see the README.md files in their repositories:
+- [Edge Service](https://github.com/GroupHQ/edge-service)
+- [Group Sync](https://github.com/GroupHQ/group-sync)
+- [Group Service](https://github.com/GroupHQ/group-service)
+- [GroupHQ UI](https://github.com/GroupHQ/groupHQ-ui)
 
-Besides routing and authentication concerns, Edge Service also manages user sessions, rate-limiting, and resiliency
-concerns through circuit breakers and timeouts. 
-
-One interesting point to talk about is how authentication and authorization are handled in the GroupHQ Demo app.
-Implementing a full user authentication and authorization system that is robust and secure is overkill for this demo app.
-But we still want _some_ authentication that is good enough to prevent users from requesting members created by other users
-to be removed from a group. To accomplish this, a "self-authenticating" strategy is used. The frontend application 
-will generate a version 4 UUID (unique universal identifier) that is created using a CSPRNG (cryptographically secure 
-pseudo-random number generator). This UUID will be sent with each request to Edge Service.
-Any resources a user creates will be associated with this UUID, meaning that users won't be able to alter each other's
-resources.
-
-It's safe to say that a UUID is unique enough that another user won't be able to guess it. Of course, it can _technically_
-be brute-forced by an attacker. As probability would have it, the more combinations generated, the higher the percent 
-chance that you'll guess a valid user's UUID. Let's assume we have 100 million users. To get a 1% chance of guessing just
-one of those UUIDs, you need to generate 3.4×10^28 UUIDs. That's a big number, but computers are fast, right?
-Assuming we have a computer that can produce 10^12 (one trillion) UUIDs per second--which is a _very_ generous assumption--
-how long would it take to just have a 1% chance of generating one UUID that matches one of the 100 million UUIDs?
-1.1 billion years. I think it's safe to say it's unguessable (note, these numbers are from a conversation with
-ChatGPT, so they may be off. which you can view [here](https://chat.openai.com/share/6a4041f3-9d94-4c38-8d18-1c10edc2dd1e))
-
-However, a UUID is only as unguessable as the algorithm used to create it. If an algorithm is used that is not 
-cryptographically secure, then it is possible to guess the UUID given that the user knows the algorithm used to create
-it. For this reason, the UUID is created using a pseudo random number generator algorithm that is also cryptographically
-secure. Given all this information, it is safe to say that the UUID generated by the client is feasibly unguessable.
-The server can also generate the UUID when a user makes their initial request, and the generated UUID could be sent
-back to the user. To keep things simple, I've opted for the client generating the UUID to avoid having to send the UUID 
-back.
-
-*Note: Authentication for RSocket connections is currently being handled by the Group Sync service. This will be
-refactored in the future.
-
-## Group Sync
-One of the most important features of the GroupHQ system is to keep users in-sync with available groups and their details.
-When a member joins or leaves a group, or when a group is created, deleted, or updated, then the user should receive an
-update. To accomplish this, the Group Sync service uses RSocket to establish a persistent connection with the client.
-The RSocket protocol is a protocol that integrates well with reactive applications, providing support for streaming
-data and backpressure. It is a lightweight "wrapper" protocol that requires an underlying transport protocol, such as
-TCP or WebSockets--Group Sync uses RSocket over WebSocket.
-
-To get events, the client must first establish a connection with the Group Sync service through Edge Service. 
-The client can then subscribe to RSocket endpoints on Group Sync. Two types of endpoints exist for receiving live events:
-- Public updates: Events that are sent to all users containing information they need to keep in-sync with the server.
-- User updates: Events sent to a specific user containing information on requests the user made.
-
-Users can send requests to the Group Sync service through Edge Service for joining or leaving a group. On each request,
-Group Sync sends the request info to Group Service via an event broker. Once received, Group Service will attempt to 
-fulfill the request. Whether successful or not, Group Service will send an event detailing the results of the request
-to Group Sync via an event broker. Group Sync takes these events and forwards them to the appropriate update stream:
-- Public updates if the event was successful.
-- User updates (whether the event was successful or not).
-
-This allows users to receive updates on their requests, as well as updates on other users' requests.
-Updates on user requests are more detailed compared to the same updates on public requests. For example, in a user join
-event, a public update is sent to all users that a user joined a specific group. However, the user update will contain
-additional information, such as the user's member ID.
-
-Group Sync also provides a REST API for querying operations, which the client should send after establishing the update
-streams. Requesting groups before establishing the update streams may result in some events being lost from the time
-the groups were requested to the time the update streams were established.
-
-## Group Service
-The heart of the GroupHQ Demo. Group Service is responsible for managing groups and their members. It provides a REST
-API for querying operations and an event-driven API for mutating operations. Using an event broker, Group Service
-handles requests for several operations:
-- Creating a group
-- Updating a group
-- Joining a group
-- Leaving a group
-
-While the first two operations work in Group Service, they are disabled in Group Sync through the use of feature flags.
-Creating and updating groups is currently handled by the Group Demo Loader, a scheduled job that periodically creates
-random groups and expires groups after a set time. The last two operations are enabled in Group Sync, allowing Group Service
-to receive these request events and process them. For any operation, the request is made through service components that 
-handle the request and create an event to publish to the event broker. These events are fanned out to users through Group Sync. 
-
-## Config Service and Kubernetes Patches
-Config Service is responsible for providing applications with configuration information. It communicates with the configuration
-repository to fetch version-controller configuration files. Files exist for each of the other services. While functional,
-communicating with Config Service has been disabled in the other services. Instead, Kubernetes patches through
-Kustomize are used to inject configuration into services. The type of patches can vary depending on the environment.
-
-To elaborate, each service repository has a `k8s` (short for Kubernetes) directory that contains the base configuration for the service
-in a local Kubernetes development environment. In the `groupHQ-deployment` repository, there is a directory for each service,
-and for each service, a different environment to run on. While there are staging and production overlays defined, there is
-no staging environment as of now. Nevertheless, this strategy allows environment-specific configuration,
-the same way Config Service would.
+The rest of this guide will go into detail about deployment-related topics.
 
 ## Observability Stack
 The GroupHQ Demo uses a variety of tools to provide observability into the system, all of which are integrated with
-Grafana following the Grafana Observability Stack:
+Grafana using the Grafana Observability Stack:
 - Loki: Aggregates logs from services
 - Prometheus: Collects metrics from services
 - Tempo: Aggregates traces from services
 
 Tools such as these are essential for monitoring and debugging applications. Without them, developers would have to 
 resort to querying information on applications from the console, which is not practical, especially in a distributed 
-environment. Tracing is a boon to developers, as it allows them to see the flow of requests through the system. This
-is especially useful in a microservice architecture, where requests are routed through multiple services. Using the
-Grafana Observability Stack, developers can view traces from logs and view critical application info at a glance
-through custom dashboards.
+environment. Tracing is a boon to developers in these environments, as it allows them to see the flow of requests 
+through the system. With the Grafana Observability Stack, developers can view traces from logs and critical 
+application info at a glance through custom dashboards.
 
 Currently, Edge Service, Group Sync, and Group Service are all observable through the Grafana Observability Stack.
+Check out the [Development Environment Setup](#development-environment-setup) section for instructions
+on how to access the Grafana dashboard locally.
 
 ## Docker
-In this repository a `docker` folder is included for local development without using Kubernetes. The most common use case
-here is to run backing services, such as databases, for your applications running on your local machine to communicate with.
-Using containerized backing services provides a more consistent, portable, and production-like environment for your applications.
+In this repository a `docker` folder is included for local development without using Kubernetes. The most common use 
+case here is to run backing services, such as databases, for your applications running on your local machine.
+Using containerized backing services provides a more consistent, portable, and production-like environment for 
+developing.
 
 ## Kubernetes
 When an application is ready to be deployed, the `kubernetes` folder is used. 
 
-Notice the `applications/development` folder. It contains a `Tiltfile` to run the `Tiltfile`s in Edge Service, Group Sync, and 
-Group Service. Each service's `Tiltfile` has instructions on deploying the application to your current Kubernetes context
-based on the base manifest files located in the repository's `k8s` folder.
+Notice the `applications/development` folder. It contains a `Tiltfile` to run the `Tiltfile`s in Edge Service, 
+Group Sync, and Group Service. Each service's `Tiltfile` has instructions on deploying the application to your current 
+Kubernetes context based on the base manifest files located in the repository's `k8s` folder.
 
 The rest of the `applications` folder contains overlays to customize each repositories base manifest files for different
-environments. For example, the `applications/*/production` folder contains overlays for the production environment for 
-a given service.
+environments. For example, the `applications/*/production` folders contains production overlays for a given service.
 
 The `platform` folder contains all the backing services for the GroupHQ Demo in either development or production
 environments. 
 
 In the `development` folder, these include:
 - PostgreSQL: A relational database for storing application data
-- Redis: A key-value store for caching application data
 - RabbitMQ: A message broker for sending events between services
+- Redis: A key-value store for caching application data
 
 In the `production` folder, these include:
-- ArgoCD: A GitOps tool for deploying applications to Kubernetes
+- ArgoCD: A GitOps tool for continuous deployment of applications to Kubernetes
 - ingress-nginx: A Kubernetes Ingress Controller for routing requests to services
-- RabbitMQ: A message broker for sending events between services
+- RabbitMQ: A message broker for sending events between services using the AMQP protocol
 - Grafana: A tool for visualizing metrics and logs
 - Loki: A tool for aggregating logs
 - Prometheus: A tool for collecting metrics
 - Tempo: A tool for aggregating traces
 
-The following is created through a Cloud Provider's managed services. These are services that are managed by the Cloud Provider
-they are not deployed to Kubernetes:
+The following is created through a Cloud Provider's managed services. These are services that are managed by the 
+Cloud Provider--they are not deployed to the Kubernetes cluster:
 - PostgreSQL: A relational database for storing application data
 - Redis: A key-value store for caching application data
 
-## GroupHQ Architecture Diagram
-![structurizr-1-GroupHQ_Demo_Containers Alpha 0 1 1 1](https://github.com/GroupHQ/groupHQ-deployment/assets/88041024/df273f5d-a065-4555-8427-80b226185e6a)
+### Overlays (i.e. configuration patches)
+Patches in Kubernetes are created through Kustomize, and are used to apply and/or override configuration for a service. 
+The type of patches can vary depending on the environment.
 
+To elaborate, each service repository has a `k8s` (short for Kubernetes) directory that contains the base configuration 
+for the service in a local Kubernetes development environment. In the `groupHQ-deployment` repository, there is a 
+directory for each service, and for each service, a different environment to run on. 
+While there are staging and production overlays defined, there are no staging environments as of now. 
+Nevertheless, this strategy allows environment-specific configuration to be injected into the base configuration
+with the help of Kustomize.
 
-# Development Environment Setup
+## Development Environment Setup
 There are two ways to set up the GroupHQ development environment: using Docker or using Kubernetes. The Docker setup is
-the easiest to get started with, but the Kubernetes setup is the most production-like environment and allows for testing
-of Kubernetes manifests. Unlike the Docker setup, the Kubernetes setup enables HTTPS/WSS connections.
+the easiest to get started with, but the Kubernetes setup provides the most production-like environment with TLS 
+enabled, and allows for testing of Kubernetes manifests and secure connections.
 
-## Local Environment Using Docker
+### Local Environment Using Docker
 You can find all Docker related files under the `docker` directory of this project. Container definitions 
 are specified in the `docker-compose.yml`, and they include the containers necessary to build the Grafana Observability
 Stack. Building any of the following containers: `group-service`, `group-sync`, `edge-service`, will trigger the
@@ -200,24 +147,31 @@ the backend services and their backing services, as well as the Grafana Observab
 containers in detached mode, meaning that the containers will run in the background. Make sure to run this command
 in the `docker` directory.
 
-You can access the Grafana dashboard at http://localhost:3000. The default username is `user` and the password is `password`.
+If you're interested in running only one service with its dependencies, you can run the following command:
+`docker-compose up -d <service-name>`. For example, to run Group Service, you would use the following command:
+`docker-compose up -d group-service`. This will build the Group Service container and its backing services, along
+with the Grafana Observability Stack.
 
-## Local Environment Using Kubernetes
+You can access the Grafana dashboard at http://localhost:3000. The default username is `user` and the default password 
+is `password`.
+
+### Local Environment Using Kubernetes
 This is the recommended environment for development. It is the most production-like environment and allows for
-testing of Kubernetes manifests. Due to the complexity of setting up the environment, it is recommended to use the
-quick-start scripts to set up the environment. See the README.md file in the `kubernetes/quick-start/local` folder
+testing of TLS connections and Kubernetes manifests. Due to the complexity of setting up the environment, it is 
+recommended to use the quick-start scripts. See the README.md file in the `kubernetes/quick-start/local` folder
 for more details on:
 - Programs to have installed on your system before running the scripts
 - Details on what the scripts do
 - Which scripts to run
+- How to access the Grafana dashboard in a Kubernetes environment
 
-# Production Environment Setup
+## Production Environment Setup
 There is no script to perform all the following steps, but one may be created in the future.
 The main reason being is that some of these commands are vendor-specific (to Digital Ocean via the `doctl` command), and
 a script based on these steps would be limited to Digital Ocean.
 Ideally, something like Terraform would be used to create the cluster and backing services to avoid vendor lock-in.
 
-## Creating the Cluster
+### Creating the Cluster
 Create a Digital Ocean Kubernetes cluster in the New York City area with the following command:
 ```shell
 doctl k8s cluster create grouphq-cluster \
@@ -225,14 +179,15 @@ doctl k8s cluster create grouphq-cluster \
 --region nyc1
 ```
 
-In the `kubernets/platform/production/ingress-nginx` folder, run the following command to deploy the Digital Ocean NGINX controller:
+In the `kubernets/platform/production/ingress-nginx` folder, run the following command to deploy the Digital Ocean 
+NGINX controller:
 ```shell
 ./deploy.sh
 ```
 
-## Creating the Backing Services
+### Creating the Backing Services
 
-### PostgreSQL
+#### PostgreSQL
 Create the PostgreSQL database server with the following command:
 ```shell
 doctl databases create grouphq-db \
@@ -250,7 +205,7 @@ Then configure a firewall to only allow traffic from the cluster:
 ```shell
 doctl databases firewalls append <postgres_id> --rule k8s:<cluster_id>
 ```
-You can get the postgres_id and cluster_id by running the following command:
+You can get the `postgres_id` and `cluster_id` by running the following command:
 ```shell
 doctl databases list
 ```
@@ -267,14 +222,14 @@ doctl databases connection <postgres_id> --format Host,Port,User,Password
 
 Then create a secret for the database credentials (used by the group-service manifests):
 ```shell
-kubectl create secret generic polar-postgres-catalog-credentials \
---from-literal=spring.datasource.url="spring.flyway.url=jdbc:postgresql://<postgres_host>:<postgres_port>/polardb_order" \
---from-literal="spring.r2dbc.url=r2dbc:postgresql://<postgres_host>:<postgres_port>/polardb_order?ssl=true&sslMode=require" 
+kubectl create secret generic grouphq-postgres-group-credentials \
+--from-literal="spring.flyway.url=jdbc:postgresql://<postgres_host>:<postgres_port>/<database_name>" \
+--from-literal="spring.r2dbc.url=r2dbc:postgresql://<postgres_host>:<postgres_port>/<database_name>?ssl=true&sslMode=require" \
 --from-literal=spring.r2dbc.username=<postgres_username> \
 --from-literal=spring.r2dbc.password=<postgres_password>
 ```
 
-### Redis
+#### Redis
 Create the Redis database server with the following command:
 ```shell
  doctl databases create grouphq-redis \
@@ -308,38 +263,39 @@ kubectl create secret generic grouphq-redis-credentials \
  --from-literal=spring.redis.ssl=true
 ```
 
-### RabbitMQ
+#### RabbitMQ
 Unlike the other backing services which use servers managed by Digital Ocean, RabbitMQ is not offered as a managed
-service by Digital Ocean. Instead, the RabbitMQ cluster-operator is used to deploy RabbitMQ to the cluster.
+service. Instead, the RabbitMQ cluster-operator is used to deploy RabbitMQ to the cluster.
 
 In the `kubernets/platform/production/rabbitmq` folder, run the following command to deploy the RabbitMQ cluster-operator:
 ```shell
 ./deploy.sh
 ```
-(script courtesy of Thomas Vitale from their book _Cloud Native Spring in Action_)
+(script courtesy of Thomas Vitale from their book _[Cloud Native Spring in Action](https://www.manning.com/books/cloud-native-spring-in-action)_)
 
-The script creates a secret for the RabbitMQ credentials which are included by the group-service and group-sync manifests.
+The script creates a secret for the RabbitMQ credentials which are included by the `group-service` and `group-sync`
+manifests.
 
-## Deploying the Grafana Observability Stack
+### Deploying the Grafana Observability Stack
 To enable observability in production using the Grafana Observability Stack, navigate to the 
 `kubernetes/platform/production/observability` folder. Run the following command to deploy the Grafana Observability Stack:
 ```shell
 ./deploy.sh
 ```
-(script courtesy of Thomas Vitale from their book _Cloud Native Spring in Action_)
+(script courtesy of Thomas Vitale from their book _[Cloud Native Spring in Action](https://www.manning.com/books/cloud-native-spring-in-action)_)
 
-Refer to the README.md file in that directory for more information.
+Refer to the README.md file in that directory for more information on how to access the Grafana dashboard.
 
-## Deploying the Applications Using ArgoCD
-To deploy the applications, we'll be using ArgoCD, a GitOps tool for deploying applications to Kubernetes.
-You'll need to have the ArgoCD CLI installed on your system. You can find instructions on how to install it
+### Deploying and Syncing the Applications Using Argo CD
+To deploy and sync the applications, we'll be using Argo CD, a GitOps tool for continuous deployments of applications in 
+Kubernetes. You'll need to have the Argo CD CLI installed on your system. You can find instructions on how to install it
 [here](https://argo-cd.readthedocs.io/en/stable/cli_installation/).
 
 In the `kubernets/platform/production/argocd` folder, run the following command to deploy the ArgoCD application:
 ```shell
-`./deploy.sh`
+./deploy.sh
 ```
-(script courtesy of Thomas Vitale from their book _Cloud Native Spring in Action_)
+(script courtesy of Thomas Vitale from their book _[Cloud Native Spring in Action](https://www.manning.com/books/cloud-native-spring-in-action)_)
 
 Get the password for logging into the ArgoCD production service by running the following command:
 ```shell
@@ -347,18 +303,17 @@ kubectl -n argocd get secret argocd-initial-admin-secret \
 -o jsonpath="{.data.password}" | base64 -d; echo
 ```
 
-Get the ArgoCD production service's external IP address by running the following command:
+Get the Argo CD production service's external IP address by running the following command:
 ```shell
 kubectl -n argocd get service argocd-server
 ```
 
-Log in to the ArgoCD production service. using the following command (default username is `admin`):
+Log in to the Argo CD production service. using the following command (default username is `admin`):
 ```shell
 argocd login <argocd-external-ip>
 ``` 
 
-Next you'll need to add each configure ArgoCD to sync each application repository. You can do this by running the following
-command for each application repository as well as the deployment repository:
+Next you'll need to configure Argo CD to sync each application repository.
 
 The following command needs to be run for private repositories in order to give ArgoCD access to the repository:
 ```shell
@@ -366,7 +321,6 @@ argocd repo add <repo-link> \
 --username <username> \
 --password <password or access token with repo scope>
 ```
-
 In total, you should be adding the following repositories:
 - [Group Service](https://github.com/GroupHQ/group-service)
 - [Group Sync](https://github.com/GroupHQ/group-sync)
@@ -396,17 +350,19 @@ argocd app create group-service \
 --auto-prune
 ```
 
-This tells ArgoCD that any changes made to the manifests in the `kubernetes/applications/group-service/production` folder
-should trigger a new application of the manifests to the cluster. These manifests are updated whenever a change
-is made to the `main` branch of the `group-service` repository (configured separately in those repository's GitHub Actions).
+This tells Arg CD that any changes made to the manifests in the `kubernetes/applications/group-service/production` 
+folder should trigger a new application of the manifests to the cluster. These manifests are updated whenever a change
+is made to the `main` branch of the `group-service` repository. A series of GitHub Actions then run to create the new 
+service image, dispatch the updated image information to the GroupHQ Deployment repository, and update the image tags in 
+the production manifests, committing the changes to the main branch. These changes are eventually picked up by Argo CD.
 
-## Setting Up TLS/SSL Certificate for HTTPS/WSS Connections
+### Setting Up TLS/SSL Certificate for HTTPS/WSS Connections
 In production, Let's Encrypt is used to automate the process of periodically providing free TLS certificates for the
 `grouphq.org` domain.
 
-First, the Let's Encrypt ClusterIssuer manifest needs a Digital Ocean API access token with read and write access
-to interact with the Digital Ocean DNS API. Put that token in the `secrets/kubernets/production/lets-encrypt-do-dns.yml`
-file. If you've never worked with the `secrets` folder, then it's probably named `secrets-checkReadMeInThisFolder`.
+First, the Let's Encrypt `ClusterIssuer` manifest needs a CloudFlare API token CloudFlare DNS API (which GroupHQ uses for its DNS servers). 
+Put that token in the `secrets/kubernets/production/cloudflare-api-token-secret.yml` file. 
+If you've never worked with the `secrets` folder, then it's probably named `secrets-checkReadMeInThisFolder`.
 Follow the instructions in the README.md file in that folder before continuing.
 
 After applying the secret to the cluster, go to the `kubernetes/platform/production/lets-encrypt` folder.
@@ -420,21 +376,21 @@ In the `kubernetes/applications/edge-service/production/patch-ingress.yml` file,
 `cert-manager.io/cluster-issuer: letsencrypt-issuer`. This tells the NGINX controller to specifically use the
 `letsencrypt-issuer` to generate a certificate for the `grouphq.org` domain.
 
-## Deleting the Cluster and Backing Services
+### Deleting the Cluster and Backing Services
 
-### Deleting the Cluster
+#### Deleting the Cluster
 Delete the cluster with the following command:
 ```shell
 doctl k8s cluster delete grouphq-cluster
 ```
 
-### Deleting the Backing Services
+#### Deleting the Backing Services
 Delete the PostgreSQL database server with the following command:
 ```shell
 doctl databases delete <postgres_id>
 ```
 
-You can get the postgres_id by running the following command:
+You can get the `postgres_id` by running the following command:
 ```shell
 doctl databases list
 ```
@@ -444,7 +400,7 @@ Delete the Redis database server with the following command:
 doctl databases delete <redis_id>
 ```
 
-You can get the redis_id by running the following command:
+You can get the `redis_id` by running the following command:
 ```shell
 doctl databases list
 ```

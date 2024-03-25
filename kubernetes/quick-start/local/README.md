@@ -83,7 +83,6 @@ The script does the following:
 6. Runs `minikube tunnel --profile grouphq` in the background to allow access to the application at https://localhost
 7. Waits for the services to be ready before exiting
 
-On my machine, the script takes about 15 minutes to run. The startup is heavily CPU-bound, my CPU is an 8-year-old  4-core i7-6700. So, if you have a more modern CPU, it should (hopefully) be faster.
 ### `./quick-start-test.sh`
 Similar to `quick-start-dev.sh`, but:
 1. Does not deploy the observability stack
@@ -92,8 +91,9 @@ Similar to `quick-start-dev.sh`, but:
    - `build_grouphq-ui_locally`
    - `build_group-sync_locally`
    - `build_group-service_locally`
-3. Applies a `ghcr-container-registry-read.yml` secret in the `secrets/kubernetes/development` folder to the grouphq minikube cluster
-(this secret allows the cluster to pull images from the GitHub container registry, see the README.md in the `secrets` folder for instructions on how to set it up)
+3. Applies a `ghcr-container-registry-read.yml` secret in the `secrets/kubernetes/development` folder to the 
+grouphq minikube cluster (this secret allows the cluster to pull images from the GitHub container registry, 
+see the README.md in the `secrets-checkReadMeInThisFolder` folder for instructions on how to set it up)
 
 Depending on the arguments passed, the script will build the corresponding service locally before starting it with tilt.
 This means that it will build the service based on _the currently checked-out code_.
@@ -111,3 +111,20 @@ The results of the tests will be sent back to GitHub, which will then update the
 With that said, there is still a benefit to running the script locally. It's much faster. 
 Without passing any arguments (and thus by default pulling all images from the GHCR), it takes about 5 minutes to run on my machine--66% faster.
 Just note that you won't have the Grafana observability stack available, and any changes you make to services that had their image pulled from the GHCR won't be reflected in the running service.
+
+#### Accessing the Grafana Dashboard
+If you want to access the Grafana dashboard, you'll need to run the `quick-start-dev.sh` script.
+The `quick-start-test.sh` script does not deploy the observability stack, so Grafana won't be available when running
+that script to start up the cluster.
+
+Assuming you've run the `quick-start-dev.sh` script, you can access the Grafana dashboard at http://localhost:3000.
+If you get a connection issue, you can manually start port-forwarding to the Grafana service using the following command:
+```bash
+kubectl port-forward --namespace observability-stack service/loki-stack-grafana 3000:80
+```
+
+The default username is `user`, and the password is printed by the script, but you can access it at any time by running
+the following command:
+```bash
+kubectl get secret --namespace observability-stack loki-stack-grafana -o jsonpath="{.data.admin-password}" | base64 --decode; echo
+```
