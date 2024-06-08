@@ -16,7 +16,7 @@ images:
   newTag: 320e170ce5d5edafbaeaa92fb5e28caa886ea1ac
 
 replicas:
-- count: 2
+- count: 1
   name: group-sync
 
 patches:
