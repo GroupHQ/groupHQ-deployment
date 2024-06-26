@@ -1,1 +1,1 @@
-CREATE DATABASE grouphq_group;
+CREATE DATABASE grouphq_groups;

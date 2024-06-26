@@ -4,8 +4,7 @@ services:
     depends_on:
       - grouphq-postgres
       - grouphq-rabbitmq
-      - grafana
-    image: "ghcr.io/grouphq/group-service"
+    image: "group-service"
     container_name: "group-service"
     ports:
       - "9001:9001"
@@ -19,13 +18,13 @@ services:
       - BPL_DEBUG_PORT=8001
       - BP_JVM_TYPE=JDK
       - SPRING_RABBITMQ_HOST=grouphq-rabbitmq
-      - SPRING_R2DBC_URL=r2dbc:postgresql://grouphq-postgres:5432/grouphq_group
-      - SPRING_FLYWAY_URL=jdbc:postgresql://grouphq-postgres:5432/grouphq_group
+      - SPRING_R2DBC_URL=r2dbc:postgresql://grouphq-postgres:5432/grouphq_groups
+      - SPRING_FLYWAY_URL=jdbc:postgresql://grouphq-postgres:5432/grouphq_groups
       - GROUP_LOADER_ENABLED=true
       - SERVER_ERROR_INCLUDE-STACKTRACE=never
       - LOKI_URL=http://loki:3100/loki/api/v1/push
       - ZIPKIN_HOST=tempo
-      - SPRING_PROFILES_ACTIVE=production
+      - SPRING_PROFILES_ACTIVE=prod
     logging:
       driver: fluentd
       options:
@@ -35,7 +34,7 @@ services:
     depends_on:
       - grouphq-rabbitmq
       - grafana
-    image: "ghcr.io/grouphq/group-sync"
+    image: "group-sync"
     container_name: "group-sync"
     ports:
       - "9002:9002"
@@ -62,7 +61,7 @@ services:
     depends_on:
       - grouphq-redis
       - grafana
-    image: "ghcr.io/grouphq/edge-service"
+    image: "edge-service"
     container_name: "edge-service"
     ports:
       - "9000:9000"
@@ -87,7 +86,7 @@ services:
         fluentd-address: 127.0.0.1:24224
 
   grouphq-postgres:
-    image: "postgres:14.4"
+    build: ./postgresql/ssl
     container_name: "grouphq-postgres"
     ports:
       - "5432:5432"
@@ -96,6 +95,7 @@ services:
       - POSTGRES_PASSWORD=password
     volumes:
       - ./postgresql/init.sql:/docker-entrypoint-initdb.d/init.sql
+      - ./postgresql/postgres-data:/var/lib/postgresql/data
 
   grouphq-rabbitmq:
     image: rabbitmq:3.12-management
