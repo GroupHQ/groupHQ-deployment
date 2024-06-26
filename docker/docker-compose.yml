@@ -85,6 +85,7 @@ services:
       options:
         fluentd-address: 127.0.0.1:24224
 
+  # NOTE: See README.md in the ./postgresql/ssl folder for instructions on enabling SSL
   grouphq-postgres:
     build: ./postgresql/ssl
     container_name: "grouphq-postgres"
