@@ -8,7 +8,7 @@ services:
     container_name: "group-service"
     ports:
       - "9001:9001"
-      - "8001:8001"
+#      - "8001:8001"
     environment:
       - JAVA_TOOL_OPTIONS=-javaagent:/workspace/BOOT-INF/lib/opentelemetry-javaagent-1.26.0.jar
       - OTEL_SERVICE_NAME=group-service
@@ -25,10 +25,10 @@ services:
       - LOKI_URL=http://loki:3100/loki/api/v1/push
       - ZIPKIN_HOST=tempo
       - SPRING_PROFILES_ACTIVE=prod
-    logging:
-      driver: fluentd
-      options:
-        fluentd-address: 127.0.0.1:24224
+#    logging:
+#      driver: fluentd
+#      options:
+#        fluentd-address: 127.0.0.1:24224
 
   group-sync:
     depends_on:
@@ -38,7 +38,7 @@ services:
     container_name: "group-sync"
     ports:
       - "9002:9002"
-      - "8002:8002"
+#      - "8002:8002"
     environment:
       - JAVA_TOOL_OPTIONS=-javaagent:/workspace/BOOT-INF/lib/opentelemetry-javaagent-1.26.0.jar
       - OTEL_SERVICE_NAME=group-sync
@@ -52,10 +52,10 @@ services:
       - LOKI_URL=http://loki:3100/loki/api/v1/push
       - ZIPKIN_HOST=tempo
       - SPRING_PROFILES_ACTIVE=production
-    logging:
-      driver: fluentd
-      options:
-        fluentd-address: 127.0.0.1:24224
+#    logging:
+#      driver: fluentd
+#      options:
+#        fluentd-address: 127.0.0.1:24224
 
   edge-service:
     depends_on:
@@ -65,7 +65,7 @@ services:
     container_name: "edge-service"
     ports:
       - "9000:9000"
-      - "8000:8000"
+#      - "8000:8000"
     environment:
       - JAVA_TOOL_OPTIONS=-javaagent:/workspace/BOOT-INF/lib/opentelemetry-javaagent-1.26.0.jar
       - OTEL_SERVICE_NAME=edge-service
@@ -80,10 +80,10 @@ services:
       - LOKI_URL=http://loki:3100/loki/api/v1/push
       - ZIPKIN_HOST=tempo
       - SPRING_PROFILES_ACTIVE=production
-    logging:
-      driver: fluentd
-      options:
-        fluentd-address: 127.0.0.1:24224
+#    logging:
+#      driver: fluentd
+#      options:
+#        fluentd-address: 127.0.0.1:24224
 
   # NOTE: See README.md in the ./postgresql/ssl folder for instructions on enabling SSL
   grouphq-postgres:

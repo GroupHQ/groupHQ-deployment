@@ -4,7 +4,7 @@ WORKDIR /var/lib/postgresql
 
 # Generate SSL certificates
 RUN openssl genrsa -out server.key 2048 \
-    && openssl req -new -x509 -days 365 -key server.key -out server.crt -subj "/C=US/ST=New York/L=Brooklyn/O=GroupHQ/OU=staging/CN=localhost" \
+    && openssl req -new -x509 -days 365 -key server.key -out server.crt -subj "/C=US/ST=New York/L=Brooklyn/O=GroupHQ/OU=staging/CN=grouphq-postgres" \
     && chmod 600 server.key \
     && chown postgres:postgres server.key server.crt
 
