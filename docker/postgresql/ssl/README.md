@@ -15,7 +15,12 @@ but that results in no changes to the `$PGDATA/postgresql.conf` file. Simply run
 the logs indicate the Postgres server is ready:
 
 ```bash
-docker exec -it grouphq-postgres bash /usr/local/bin/init-ssl.sh
+docker exec -it grouphq-postgres bash
+```
+
+Then run the 
+```bash
+/usr/local/bin/init-ssl.sh
 ```
 
 You can verify the SSL properties have been enabled by reading the `$PGDATA/postgresql.conf` file:
@@ -24,7 +29,37 @@ You can verify the SSL properties have been enabled by reading the `$PGDATA/post
 cat $PGDATA/postgresql.conf
 ```
 
+This doesn't mean it will take effect though. 
+You can verify that the configuration has been refreshed by logging into the psql shell:
+
+First, make sure you're shelled into the container:
+
+```bash
+docker exec -it grouphq-postgres bash
+```
+
+Then login to the psql shell:
+
+```bash
+psql -U user -d grouphq_groups
+```
+
+Then execute the following command:
+
+```bash
+SHOW ssl
+```
+
+Feel free to check the `init-ssl.sh` script to see how SSL is enabled on the Postgres instance.
+
 One more thing. Non-SSL connections will still be accepted. To ensure that you're communicating over SSL,
 make sure to pass the relevant JDBC properties for requiring SSL. For example:
 
 `jdbc:postgresql://grouphq-postgres/grouphq_groups?ssl=true&sslMode=verify-full`
+
+### Retrieving the client certificate
+To retrieve the certificate for use in applications connecting to the Postgres instance, run the following command:
+
+```bash
+docker cp grouphq-postgres:/var/lib/postgresql/server.crt .
+```
