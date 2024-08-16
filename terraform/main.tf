@@ -130,7 +130,7 @@ module "db" {
   # NOTE: Do NOT use 'user' as the value for 'username' as it throws:
   # "Error creating DB Instance: InvalidParameterValue: MasterUsername
   # user cannot be used as it is a reserved word used by the engine"
-  db_name  = "grouphq-postgres"
+  db_name  = "grouphq_postgres"
   username = "postgres"
   port     = 5432
 
@@ -190,8 +190,8 @@ module "db_security_group" {
   source  = "terraform-aws-modules/security-group/aws"
   version = "~> 5.0"
 
-  name        = "GroupHQStagingDatabaseSG"
-  description = "GroupHQ Staging Security Group for AWS managed PostgreSQL access"
+  name        = "${local.name}-database-sg"
+  description = "${local.name} Security Group for AWS managed PostgreSQL access"
   vpc_id      = module.vpc.vpc_id
 
   # ingress
@@ -204,6 +204,15 @@ module "db_security_group" {
       cidr_blocks = module.vpc.vpc_cidr_block
     },
   ]
+
+  tags = local.default_tags
+}
+
+module "aws_ssm_parameter_database_connection_string" {
+  source  = "terraform-aws-modules/ssm-parameter/aws"
+
+  name        = "${local.name}-database-connection-string"
+  value       = module.db.db_instance_endpoint
 
   tags = local.default_tags
 }
